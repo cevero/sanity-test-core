@@ -1,3 +1,0 @@
-vlog -sv -mfcu ip/zero-riscy/include/*.sv ip/zero-riscy/*.sv ip/soc_components/soc_utils/*.sv +incdir+ip/zero-riscy/include rtl/*.sv tb/*.sv
-
-vsim -c -voptargs="+acc" -do script/sim.do tb_sanity_core
