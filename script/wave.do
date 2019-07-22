@@ -11,6 +11,7 @@ add wave -radix hexadecimal /tb_sanity_test_core/dut/core_0/data_rdata_i
 add wave -radix unsigned /tb_sanity_test_core/dut/core_0/alu_operand_a_ex 
 add wave -radix unsigned /tb_sanity_test_core/dut/core_0/alu_operand_b_ex 
 add wave -radix unsigned /tb_sanity_test_core/dut/core_0/alu_adder_result_ex
+add wave -radix decimal sim:/tb_sanity_test_core/dut/core_0/id_stage_i/registers_i/rf_reg
 TreeUpdate [SetDefaultTree]
 WaveRestoreCursors {{Cursor 1} {175 ps} 0}
 quietly wave cursor active 1

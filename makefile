@@ -10,6 +10,7 @@ CC = vlog
 SIM = vsim
 TOP_LEVEL = $(shell basename `pwd` | tr '-' '_')
 WORK = work
+FILE = fibonacci.bin
 
 default: all
 
@@ -32,9 +33,13 @@ compile:
 # Executes the simulation in batch mode using the commands on the script/run.do
 # file.
 run:
-	$(SIM) -batch -voptargs="+acc" -do script/run.do work.tb_$(TOP_LEVEL)
+	$(SIM) -batch -voptargs="+acc" \
+		   -G/tb_sanity_test_core/test_file=\"$(FILE)\" \
+		   -do script/run.do work.tb_$(TOP_LEVEL)
 wave:
-	$(SIM) -voptargs="+acc" -do script/wave.do work.tb_$(TOP_LEVEL)
+	$(SIM) -voptargs="+acc" \
+		   -G/tb_sanity_test_core/test_file=\"$(FILE)\" \
+		   -do script/wave.do work.tb_$(TOP_LEVEL)
 
 # Removes all generated files
 clean:

@@ -1,4 +1,7 @@
+
+
 module tb_sanity_test_core;
+    parameter test_file = "fibonacci.bin";
 
     logic        clk_i;
     logic        rst_ni;
@@ -14,36 +17,33 @@ module tb_sanity_test_core;
         .fetch_enable_i (fetch_en_i  ),
         .instr_addr_o_0 (instr_addr_0)
     );
-
+ 
     initial begin
         // https://www.hdlworks.com/hdl_corner/verilog_ref/items/SystemFileTasks.htm
         reg [639:0] err_str;
         integer error;
         integer file; // file descriptor
-        static integer start = 32; // Start position in memory words (4-bytes) to start copying
-        // start = 32 is the position equivalent to position 0x80 (bytes), and this is the start address for
-        // the zero-riscy core
-        static integer count = 15; // Number of words (4-bytes) to copy from the file to memory
+        static integer start = 32;  // Start position in memory words (4-bytes) to start copying
+                                    // start = 32 is the position equivalent to position 0x80 (bytes), and this is the start address for
+                                    // the zero-riscy core
+        static integer count = 15;  // Number of words (4-bytes) to copy from the file to memory
 
-        file = $fopen("input_files/fibonacci.bin", "r");
+        $display("file = %s", {"input_files/", test_file});
+        file = $fopen({"input_files/", test_file}, "r");
         error = $ferror(file, err_str);
         if (error != 0) begin
             $display("erro = %s", err_str);
         end
         $display("file = %b", file);
-        $fread(dut.inst_mem.mem, file, start, count);
+        $fread(dut.inst_mem.mem, file, start);
     end
 
     initial clk_i = 0;
     always #1 clk_i = ~clk_i;
 
-    assign mem_flag = dut.data_mem.mem[0];
-    assign mem_result = dut.data_mem.mem[1];
-      
-    initial begin
-        $display("time | inst_addr_0 | mem_flag | mem_result |\n");
-        $monitor ("%4t | %11h | %8b | %10d |", $time, instr_addr_0, mem_flag, mem_result);
+    string inst_program;
 
+    initial begin
         rst_ni = 0;
         fetch_en_i = 0;
         #1;
@@ -53,8 +53,23 @@ module tb_sanity_test_core;
         #600 $finish;
     end
 
-    always @*
-      if (mem_flag)
-          #1 $finish;
+    logic [31:0] instruction;
+    assign instruction = dut.core_0.id_stage_i.instr_rdata_i;
+
+    always @(posedge clk_i) begin
+        if (dut.core_0.id_stage_i.id_ready_o &&
+            dut.core_0.id_stage_i.id_valid_o &&
+            dut.core_0.id_stage_i.is_decoding_o &&
+            dut.core_0.ex_block_i.ex_ready_o) begin
+            string inst;
+            $sformat(inst, "%8h", instruction);
+            inst_program = {inst_program,inst};
+        end
+
+        if (^(dut.core_0.id_stage_i.instr_rdata_i)=== 1'bX) begin
+            $display("executed instructions - hex dump: %s",inst_program);
+            #1 $finish;
+        end
+    end
 
 endmodule

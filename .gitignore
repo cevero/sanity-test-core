@@ -5,6 +5,7 @@ build/!.keep
 *.log
 *.vcd
 *.wlf
+*.out
 work
 transcript
 
